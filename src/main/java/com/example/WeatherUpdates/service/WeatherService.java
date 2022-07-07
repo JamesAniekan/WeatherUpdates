@@ -5,9 +5,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 
 
 @Service
@@ -20,7 +22,7 @@ public class WeatherService {
 
     private final Logger LOG = LoggerFactory.getLogger(WeatherService.class);
 
-
+    //cityweather method returns a jsonobject of api data.
     public JSONObject cityWeather(String city){
 
         String apiEndpoint = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey;
@@ -33,6 +35,9 @@ public class WeatherService {
 
     }
 
+    //Required data for Weather properties are extracted from jsonobject data and used to create a Weather object
+    //which is returned and cached.
+    @Cacheable("weather")
     public Weather getWeather(String city){
 
         JSONObject responseResult = cityWeather(city);
@@ -49,18 +54,20 @@ public class WeatherService {
         Long visibility  = responseResult.getLong("visibility");
 
 
-        return Weather.builder()
-                .id(id)
-                .country(country)
-                .humidity(humidity)
-                .pressure(pressure)
-                .tempMax(tempMax)
-                .tempMin(tempMin)
-                .windSpeed(windSpeed)
-                .visibility(visibility)
-                .description(description)
-                .temperature(temp)
-                .build();
+        return           Weather.builder()
+                                .id(id)
+                                .country(country)
+                                .humidity(humidity)
+                                .pressure(pressure)
+                                .tempMax(tempMax)
+                                .tempMin(tempMin)
+                                .windSpeed(windSpeed)
+                                .visibility(visibility)
+                                .description(description)
+                                .temperature(temp)
+                                .build();
+
+
     }
 
 
